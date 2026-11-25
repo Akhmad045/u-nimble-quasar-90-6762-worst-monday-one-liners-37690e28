@@ -108,11 +108,17 @@ def emit_line(dest: Path) -> str:
 
 def self_check() -> int:
     """Verify the pick against the gate and report its fingerprint."""
-    ok = gate_ok(PICK) and PICK in CONTENDERS and len(CONTENDERS) == 15
+    contenders_ok = (
+        len(CONTENDERS) == 15
+        and len(set(CONTENDERS)) == len(CONTENDERS)
+        and all(gate_ok(c) for c in CONTENDERS)
+    )
+    ok = gate_ok(PICK) and PICK in CONTENDERS and contenders_ok
     digest = hashlib.sha256(PICK.encode("utf-8")).hexdigest()
     print(f"line: {PICK}")
     print(f"chars: {len(PICK)}  bytes: {len(PICK.encode('utf-8'))}")
     print(f"sha256: {digest}")
+    print(f"contenders: {len(CONTENDERS)} distinct, all gate-clean: {contenders_ok}")
     print(f"gate: {'PASS' if ok else 'FAIL'}")
     return 0 if ok else 1
 
